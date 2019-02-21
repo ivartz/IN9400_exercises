@@ -65,8 +65,8 @@ def activation(Z, activation_function):
     """
     # TODO: Task 1.2 a)
     if activation_function == 'relu':
-        Z[Z<0] = 0
-        return Z
+        # Z should not be changed (call by reference is default in Python)
+        return (Z>0)*Z
     else:
         print("Error: Unimplemented activation function: {}", activation_function)
         return None
@@ -86,13 +86,16 @@ def softmax(Z):
         numpy array of floats with shape [n, m]
     """
     # TODO: Task 1.2 b)
+    # Copy, since Z should not be changed (call by reference is default in Python)
+    Z_copy = Z.copy()
+    
     # Trick 1
-    Z -= np.max(Z, axis=0, keepdims=True) # max of every sample (m samples)
+    Z_copy -= np.max(Z_copy, axis=0, keepdims=True) # max of every sample (m samples)
 
-    sum_Z = np.sum(np.exp(Z), axis=0, keepdims=True)
+    sum_Z = np.sum(np.exp(Z_copy), axis=0, keepdims=True)
 
     # Trick 2
-    log_softmax = Z - np.log(sum_Z)
+    log_softmax = Z_copy - np.log(sum_Z)
     return np.exp(log_softmax)
 
 
