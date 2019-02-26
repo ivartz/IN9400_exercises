@@ -2,3 +2,4 @@ The excercise is similar to the CS231n exercise
 
 
 https://github.com/bruceoutdoors/CS231n/blob/master/assignment1/cs231n/classifiers/k_nearest_neighbor.py
+https://github.com/lightaime/cs231n/blob/master/assignment2/cs231n/layers.py

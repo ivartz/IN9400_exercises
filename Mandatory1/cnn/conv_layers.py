@@ -13,6 +13,7 @@
 """Implementation of convolution forward and backward pass"""
 
 import numpy as np
+import sys
 
 def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     """
@@ -30,16 +31,78 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     Returns:
         output_layer: The output layer with shape (batch_size, num_filters, height_y, width_y)
     """
-    # TODO: Task 2.1
-    output_layer = None # Should have shape (batch_size, num_filters, height_y, width_y)
+    # TODO: Task 2.1   
+    def compute_output_layer_shape(input_heigth, \
+                                   input_width, \
+                                   kernel_heigth, \
+                                   kernel_width, \
+                                   pad_size, \
+                                   stride):
+        # Formula for the spatial dimensions of an image
+        # in an convolutional output layer.
+        return np.int(np.floor(1 + (input_heigth + 2*pad_size - kernel_heigth)/stride)), \
+                np.int(np.floor(1 + (input_width + 2*pad_size - kernel_width)/stride))
+    
+    # Flipping kernels to so that it is convolution and not correlation.
+    # This is not necessary, since the weights are random initialized.
+    #weight = weight[:,:,::-1,::-1]
 
+    num_filters, _, height_weights, width_weights = weight.shape
+    
+    batch_size, channels_input_layer, height_input_layer, width_input_layer = \
+                                                    input_layer.shape
+
+    # Define dimension of output layer.
+    height_output_layer, width_output_layer,  = \
+                    compute_output_layer_shape(height_input_layer, \
+                                                 width_input_layer, \
+                                                 height_weights, \
+                                                 width_weights, \
+                                                 pad_size, \
+                                                 stride)
+    channels_output_layer = num_filters
+
+    # Should have shape (batch_size, num_filters, height_y, width_y)
+    output_layer = np.zeros(shape=(batch_size, \
+                                   channels_output_layer, \
+                                   height_output_layer, \
+                                   width_output_layer))
+
+    # The center of the kernel is directly above the output
+    # pixel. The coordinates for the center of the kernel
+    # is therefore used.
+    half_height_weights, half_width_weights = \
+        np.int(np.floor((height_weights-1)/2)), np.int(np.floor((width_weights-1)/2))
+    
+    # Padding.
+    # (pad,) or int is a shortcut for before = after = pad width for all axes. 
+    # For instance, pad width = 1 and constant pad value = 0 on this data axis 111 gives 01110 .
+    input_layer_padded = np.pad(input_layer, ((0,), (0,), (pad_size,), (pad_size,)), mode="constant", constant_values=0)
+
+    for y in range(height_output_layer):
+        for x in range(width_output_layer):
+
+            """
+            output_layer[:, :, y, x] = \
+            np.sum(input_layer_padded[:,:,y*stride:y*stride+height_weights,\
+                         x*stride:x*stride+width_weights]\
+                           *weight, axis=(1, 2, 3))
+            """
+            # This was necessary if batch_size > 1 .
+            # Otherwise, the broadcasting messes up.
+            for channel in range(channels_output_layer):
+                output_layer[:, channel, y, x] = \
+                np.sum(input_layer_padded[:,:,y*stride:y*stride+height_weights,\
+                             x*stride:x*stride+width_weights]\
+                               *weight[channel, :, :, :], axis=(1, 2, 3))
+                
     (batch_size, channels_x, height_x, width_x) = input_layer.shape
     (num_filters, channels_w, height_w, width_w) = weight.shape
 
     assert channels_w == channels_x, (
         "The number of filter channels be the same as the number of input layer channels")
 
-    return output_layer
+    return output_layer + (bias)[None, :, None, None]
 
 
 def conv_layer_backward(output_layer_gradient, input_layer, weight, bias, pad_size=1):
