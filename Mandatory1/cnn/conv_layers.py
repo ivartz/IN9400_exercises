@@ -15,6 +15,17 @@
 import numpy as np
 import sys
 
+def compute_output_layer_shape(input_heigth, \
+                               input_width, \
+                               kernel_heigth, \
+                               kernel_width, \
+                               pad_size, \
+                               stride):
+    # Formula for the spatial dimensions of an image
+    # in an convolutional output layer.
+    return np.int(np.floor(1 + (input_heigth + 2*pad_size - kernel_heigth)/stride)), \
+            np.int(np.floor(1 + (input_width + 2*pad_size - kernel_width)/stride))
+
 def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     """
     A naive implementation of the forward pass for a convolutional layer.
@@ -31,18 +42,7 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     Returns:
         output_layer: The output layer with shape (batch_size, num_filters, height_y, width_y)
     """
-    # TODO: Task 2.1   
-    def compute_output_layer_shape(input_heigth, \
-                                   input_width, \
-                                   kernel_heigth, \
-                                   kernel_width, \
-                                   pad_size, \
-                                   stride):
-        # Formula for the spatial dimensions of an image
-        # in an convolutional output layer.
-        return np.int(np.floor(1 + (input_heigth + 2*pad_size - kernel_heigth)/stride)), \
-                np.int(np.floor(1 + (input_width + 2*pad_size - kernel_width)/stride))
-    
+    # TODO: Task 2.1
     # Flipping kernels to so that it is convolution and not correlation.
     # This is not necessary, since the weights are random initialized.
     #weight = weight[:,:,::-1,::-1]
@@ -67,17 +67,12 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
                                    channels_output_layer, \
                                    height_output_layer, \
                                    width_output_layer))
-
-    # The center of the kernel is directly above the output
-    # pixel. The coordinates for the center of the kernel
-    # is therefore used.
-    half_height_weights, half_width_weights = \
-        np.int(np.floor((height_weights-1)/2)), np.int(np.floor((width_weights-1)/2))
     
     # Padding.
     # (pad,) or int is a shortcut for before = after = pad width for all axes. 
     # For instance, pad width = 1 and constant pad value = 0 on this data axis 111 gives 01110 .
-    input_layer_padded = np.pad(input_layer, ((0,), (0,), (pad_size,), (pad_size,)), mode="constant", constant_values=0)
+    input_layer_padded = \
+    np.pad(input_layer, ((0,), (0,), (pad_size,), (pad_size,)), mode="constant", constant_values=0)
 
     for y in range(height_output_layer):
         for x in range(width_output_layer):
@@ -90,11 +85,21 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
             """
             # This was necessary if batch_size > 1 .
             # Otherwise, the broadcasting messes up.
+            """
             for channel in range(channels_output_layer):
                 output_layer[:, channel, y, x] = \
                 np.sum(input_layer_padded[:,:,y*stride:y*stride+height_weights,\
                              x*stride:x*stride+width_weights]\
                                *weight[channel, :, :, :], axis=(1, 2, 3))
+            """
+            # Prettier solution
+            input_layer_padded_masked = \
+            input_layer_padded[:, :, y*stride:y*stride+height_weights, x*stride:x*stride+width_weights]
+            
+            for channel in range(channels_output_layer):
+                output_layer[:, channel, y, x] = \
+                np.sum(input_layer_padded_masked * weight[channel, :, :, :], axis=(1, 2, 3))
+
                 
     (batch_size, channels_x, height_x, width_x) = input_layer.shape
     (num_filters, channels_w, height_w, width_w) = weight.shape
@@ -105,7 +110,7 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     return output_layer + (bias)[None, :, None, None]
 
 
-def conv_layer_backward(output_layer_gradient, input_layer, weight, bias, pad_size=1):
+def conv_layer_backward(output_layer_gradient, input_layer, weight, bias, pad_size=1, stride=1):
     """
     A naive implementation of the backward pass for a convolutional layer.
 
@@ -122,12 +127,67 @@ def conv_layer_backward(output_layer_gradient, input_layer, weight, bias, pad_si
         bias_gradient: Gradient of the loss L with respect to the biases b
     """
     # TODO: Task 2.2
-    input_layer_gradient, weight_gradient, bias_gradient = None, None, None
+    input_layer_gradient, weight_gradient, bias_gradient = np.zeros(input_layer.shape), \
+                                                           np.zeros(weight.shape), \
+                                                           np.zeros(weight.shape[0])
 
     batch_size, channels_y, height_y, width_y = output_layer_gradient.shape
     batch_size, channels_x, height_x, width_x = input_layer.shape
     num_filters, channels_w, height_w, width_w = weight.shape
+    
+    # Not necessary, but checking that image dimensions in output layer
+    # match the image dimensions in output_layer_gradient .
+    height_y_comp, width_y_comp = \
+    compute_output_layer_shape(height_x, \
+                                   width_x, \
+                                   height_w, \
+                                   width_w, \
+                                   pad_size, \
+                                   stride)
+    
+    assert height_y == height_y_comp, (
+        "Height from shape of output_layer_gradient does not match with \
+        computed height based on input layer, weights, pad_size and stride")
+    assert width_y == width_y_comp, (
+        "Width from shape of output_layer_gradient does not match with \
+        computed width based on input layer, weights, pad_size and stride")
+    
+    # To correctly compute weight_gradient and bias_gradient, input layer must be padded .
+    input_layer_padded = \
+    np.pad(input_layer, ((0,), (0,), (pad_size,), (pad_size,)), mode="constant", constant_values=0)
+    
+    # input_layer_gradient will be based on input_layer_gradient_padded .
+    # With input_layer_padded there is equal amount of x/pixel contributions 
+    # to the gradient of the loss function.
+    input_layer_gradient_padded = np.zeros(input_layer_padded.shape)
 
+    for y in range(height_y):
+        for x in range(width_y):
+            input_layer_padded_masked = \
+            input_layer_padded[:, :, y*stride:y*stride+height_w, x*stride:x*stride+width_w]
+            
+            # Compute weight_gradient .
+            for channel in range(channels_y):
+                # += means that input layer contribution to weight 
+                # gradients is summed over each output channel.
+                # np.sum because weight gradients are summed over batches as well.
+                weight_gradient[channel ,: ,: ,:] += \
+                np.sum(input_layer_padded_masked * (output_layer_gradient[:, channel, y, x])[:, None, None, None], axis=0)
+            
+            # Compute input_layer_gradient_padded .
+            # Input layer gradient is different for each input sample in the batch.
+            # The input layer gradients are summed over samples.
+            for sample in range(batch_size):
+                # np.sum because input layer gradients are summed over channels as well.
+                input_layer_gradient_padded[sample, :, y*stride:y*stride+height_w, x*stride:x*stride+width_w] += \
+                np.sum((weight[:, :, :, :] * (output_layer_gradient[sample, :, y, x])[:, None, None, None]), axis=0)
+    
+    # Compute input_layer_gradient .
+    # input_layer_gradient is then extracted from input_layer_gradient_padded by removing the padding.
+    input_layer_gradient = input_layer_gradient_padded[:, :, pad_size:-pad_size, pad_size:-pad_size]
+    
+    bias_gradient = np.sum(output_layer_gradient, axis=(0, 2, 3))
+    
     assert num_filters == channels_y, (
         "The number of filters must be the same as the number of output layer channels")
     assert channels_w == channels_x, (
