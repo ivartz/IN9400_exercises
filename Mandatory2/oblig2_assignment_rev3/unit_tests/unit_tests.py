@@ -68,7 +68,7 @@ def RNNcell_test():
     myOut    = (myRnnCell.forward(x=x, state_old=h0)).detach()
     torchOut = (pytorchRnnCell.forward(input=x, hx=h0)).detach()
 
-    flag = torch.all(torch.lt(torch.abs(torch.add(myOut, - torchOut)), 1e-6))
+    flag = torch.all(torch.lt(torch.abs(torch.add(myOut, - torchOut)), 1e-5))
     if flag:
         print('The "forward" function is implemented correctly')
     else:
@@ -128,7 +128,7 @@ def GRUcell_test():
 def loss_fn_test():
 
     weight_dir = 'unit_tests/loss_fn_tensors.pt'
-    # weight_dir = 'loss_fn_tensors.pt'
+    #weight_dir = 'loss_fn_tensors.pt'
     checkpoint = torch.load(weight_dir)
         
     logits   = checkpoint['logits']
@@ -138,7 +138,7 @@ def loss_fn_test():
     meanLoss = checkpoint['meanLoss']
 
     sumLossCalc, meanLossCalc = loss_fn(logits, yTokens, yWeights)
-    diffLimit=1e-8
+    diffLimit=1e-6
 
     diff = torch.abs(sumLossCalc-sumLoss)/sumLoss
     if diff <diffLimit:

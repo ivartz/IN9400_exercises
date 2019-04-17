@@ -65,7 +65,7 @@ class imageCaptionModel(nn.Module):
 ######################################################################################################################
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_state_size, num_rnn_layers, cell_type='RNN'):
-        super(RNN, self).__init__()
+        super().__init__()
         """
         Args:
             input_size (Int)        : embedding_size
@@ -83,8 +83,10 @@ class RNN(nn.Module):
 
         # ToDo
         # Your task is to create a list (self.cells) of type "nn.ModuleList" and populated it with cells of type "self.cell_type".
-        self.cells = None
-        
+
+        self.cells = nn.ModuleList([{self.cell_type == "RNN" : RNNCell(self.hidden_state_size, self.input_size),
+                                     self.cell_type == "GRU" : GRUCell(self.hidden_state_size, self.input_size)}.get(True)\
+                                    for i in range(self.num_rnn_layers)])
         return
 
 
@@ -123,7 +125,7 @@ class RNN(nn.Module):
 ########################################################################################################################
 class GRUCell(nn.Module):
     def __init__(self, hidden_state_size, input_size):
-        super(GRUCell, self).__init__()
+        super().__init__()
         """
         Args:
             hidden_state_size: Integer defining the size of the hidden state of rnn cell
@@ -151,14 +153,54 @@ class GRUCell(nn.Module):
         self.hidden_state_sizes = hidden_state_size
 
         # TODO:
-        self.weight_u = None
-        self.bias_u   = None
+        self.weight_u = nn.Parameter(\
+                                     nn.init.normal_(\
+                                                     torch.empty(\
+                                                                 self.hidden_state_sizes+input_size, \
+                                                                 self.hidden_state_sizes), \
+                                                     mean=0, \
+                                                     std=np.sqrt(1/(self.hidden_state_sizes+input_size))
+                                                    )\
+                                    )
+        
+        self.bias_u = nn.Parameter(\
+                                   torch.zeros(\
+                                               1, \
+                                               self.hidden_state_sizes)\
+                                  )
 
-        self.weight_r = None
-        self.bias_r   = None
+        self.weight_r = nn.Parameter(\
+                                     nn.init.normal_(\
+                                                     torch.empty(\
+                                                                 self.hidden_state_sizes+input_size, \
+                                                                 self.hidden_state_sizes), \
+                                                     mean=0, \
+                                                     std=np.sqrt(1/(self.hidden_state_sizes+input_size))
+                                                    )\
+                                    )
+        
+        self.bias_r = nn.Parameter(\
+                                   torch.zeros(\
+                                               1, \
+                                               self.hidden_state_sizes)\
+                                  )
 
-        self.weight = None
-        self.bias   = None
+        self.weight = nn.Parameter(\
+                                   nn.init.normal_(\
+                                                   torch.empty(\
+                                                               self.hidden_state_sizes+input_size, \
+                                                               self.hidden_state_sizes), \
+                                                   mean=0, \
+                                                   std=np.sqrt(1/(self.hidden_state_sizes+input_size))
+                                                  )\
+                                  )
+        
+        self.bias = nn.Parameter(\
+                                 torch.zeros(\
+                                             1, \
+                                             self.hidden_state_sizes)\
+                                )
+        
         return
 
     def forward(self, x, state_old):
@@ -172,14 +214,21 @@ class GRUCell(nn.Module):
 
         """
         # TODO:
-
-        state_new = None
+        update_gate = torch.sigmoid( torch.mm(torch.cat((x, state_old), dim=1), self.weight_u) + self.bias_u )
+        
+        reset_gate = torch.sigmoid( torch.mm(torch.cat((x, state_old), dim=1), self.weight_r) + self.bias_r )
+        
+        cand_cell = torch.tanh( torch.mm(torch.cat((x, reset_gate*state_old), dim=1), self.weight) + self.bias )
+        
+        fin_cell = update_gate*state_old + (1 - update_gate)*cand_cell
+        
+        state_new = fin_cell
         return state_new
 
 ######################################################################################################################
 class RNNCell(nn.Module):
     def __init__(self, hidden_state_size, input_size):
-        super(RNNCell, self).__init__()
+        super().__init__()
         """
         Args:
             hidden_state_size: Integer defining the size of the hidden state of rnn cell
@@ -197,8 +246,19 @@ class RNNCell(nn.Module):
         self.hidden_state_size = hidden_state_size
 
         # TODO:
-        self.weight = None
-        self.bias   = None
+        self.weight = nn.Parameter(\
+                                   nn.init.normal_(\
+                                                   torch.empty(\
+                                                               self.hidden_state_size + \
+                                                               input_size, \
+                                                               self.hidden_state_size), \
+                                                   mean=0, \
+                                                   std=np.sqrt(1/(self.hidden_state_size+input_size))\
+                                                  )\
+                                  )
+                                   
+        self.bias   = nn.Parameter(torch.zeros(1, self.hidden_state_size))
+        
         return
 
 
@@ -213,7 +273,9 @@ class RNNCell(nn.Module):
 
         """
         # TODO:
-        state_new = None
+
+        state_new = torch.tanh( torch.mm(torch.cat((x, state_old), dim=1), self.weight) + self.bias )
+        
         return state_new
 
 ######################################################################################################################
@@ -236,10 +298,13 @@ def loss_fn(logits, yTokens, yWeights):
     """
     eps = 0.0000000001 #used to not divide on zero
     
-    # TODO:
-    sumLoss  = None
-    meanLoss = None
+    # TODO:    
+    losses = F.cross_entropy(logits.permute(0, 2, 1), yTokens, reduction="none")
+    
+    losses_masked = torch.masked_select(losses, yWeights.eq(1))
+    
+    sumLoss = torch.sum(losses_masked)
+
+    meanLoss = torch.mean(losses_masked)
 
     return sumLoss, meanLoss
-
-
