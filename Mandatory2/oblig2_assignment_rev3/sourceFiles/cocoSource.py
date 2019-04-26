@@ -139,15 +139,29 @@ class RNN(nn.Module):
         
         # Emtpy tensor with correct shape for using torch.cat((logits, x), dim=1)
         # containing recurrent outputs of the final dense layer. 
+        #logits = torch.empty(batch_size, 0, vocabulary_size)
         logits = torch.empty(batch_size, 0, vocabulary_size, device="cuda:0")
         
-        # Empty tensor for storing the current state for each layer/cell.
-        current_state = torch.empty(self.num_rnn_layers, batch_size, self.hidden_state_size, device="cuda:0")
+        # Empty tensor to store the hidden states for all layers in a recurrence
+        #current_state = torch.empty(0, batch_size, self.hidden_state_size)
+        current_state = torch.empty(0, batch_size, self.hidden_state_size, device="cuda:0")
+        
+        # Empty tensor to store all hidden states for all layers for all recurrences
+        #hidden_states = torch.empty(0, self.num_rnn_layers, batch_size, self.hidden_state_size)
+        hidden_states = torch.empty(0, self.num_rnn_layers, batch_size, self.hidden_state_size, device="cuda:0")
 
         # Use for loops to run over "seqLen" and "self.num_rnn_layers" to calculate logits        
         for recurrence_number in range(seqLen):
             
-            #for layer_number, state_old in enumerate(torch.unbind(initial_hidden_state)):
+            if recurrence_number > 0:
+            
+                # Store the (previous) current_state in hidden_states
+                hidden_states = \
+                torch.cat((hidden_states, current_state.view(1, self.num_rnn_layers, batch_size, self.hidden_state_size)), dim=0)
+                # Empty the current_state (new recurrence)
+                #current_state = torch.empty(0, batch_size, self.hidden_state_size)
+                current_state = torch.empty(0, batch_size, self.hidden_state_size, device="cuda:0")
+            
             for layer_number, state_old in enumerate(initial_hidden_state):
                 
                 if layer_number == 0:
@@ -174,13 +188,14 @@ class RNN(nn.Module):
                     # hidden states.
                     # Get the previous hidden state
                     # for the correct cell.
-                    state_old = current_state[layer_number]
+                    state_old = hidden_states[-1][layer_number]
                     
                 # Forward the cell.
                 state_new = self.cells[layer_number].forward(x, state_old)
                 
-                # Store the current state for the cell.
-                current_state[layer_number] = state_new
+                # Append the current state for the layer to current_state
+                current_state = \
+                torch.cat((current_state, state_new.view(1, batch_size, self.hidden_state_size)), dim=0)
                 
                 if layer_number == self.num_rnn_layers - 1:
                     # Last layer.
@@ -208,7 +223,7 @@ class RNN(nn.Module):
                     # to the logits tensor containing the logit
                     # behind the predicted word for the entire
                     # recurrentce (sequence/sentence length).
-                    logits = torch.cat((logits, logit.reshape(batch_size, 1, vocabulary_size)), dim=1)
+                    logits = torch.cat((logits, logit.view(batch_size, 1, vocabulary_size)), dim=1)
                     
                 else:
                     # Intermediate layer.
@@ -217,7 +232,6 @@ class RNN(nn.Module):
                     # y = 1*state_new = x in next layer.
                     x = state_new
         
-        # Produce outputs
         return logits, current_state
 
 ########################################################################################################################
@@ -311,7 +325,7 @@ class GRUCell(nn.Module):
             state_new: The updated hidden state of the recurrent cell. Shape [batch_size, hidden_state_sizes]
 
         """
-        # TODO:
+        # TODO:        
         update_gate = torch.sigmoid( torch.mm(torch.cat((x, state_old), dim=1), self.weight_u) + self.bias_u )
         
         reset_gate = torch.sigmoid( torch.mm(torch.cat((x, state_old), dim=1), self.weight_r) + self.bias_r )
@@ -395,7 +409,7 @@ def loss_fn(logits, yTokens, yWeights):
     """
     eps = 0.0000000001 #used to not divide on zero
     
-    # TODO:    
+    # TODO:
     losses = F.cross_entropy(logits.permute(0, 2, 1), yTokens, reduction="none")
     
     losses_masked = torch.masked_select(losses, yWeights.eq(1))
