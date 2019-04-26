@@ -139,16 +139,16 @@ class RNN(nn.Module):
         
         # Emtpy tensor with correct shape for using torch.cat((logits, x), dim=1)
         # containing recurrent outputs of the final dense layer. 
-        #logits = torch.empty(batch_size, 0, vocabulary_size)
-        logits = torch.empty(batch_size, 0, vocabulary_size, device="cuda:0")
+        logits = torch.empty(batch_size, 0, vocabulary_size)
+        #logits = torch.empty(batch_size, 0, vocabulary_size, device="cuda:0")
         
         # Empty tensor to store the hidden states for all layers in a recurrence
-        #current_state = torch.empty(0, batch_size, self.hidden_state_size)
-        current_state = torch.empty(0, batch_size, self.hidden_state_size, device="cuda:0")
+        current_state = torch.empty(0, batch_size, self.hidden_state_size)
+        #current_state = torch.empty(0, batch_size, self.hidden_state_size, device="cuda:0")
         
         # Empty tensor to store all hidden states for all layers for all recurrences
-        #hidden_states = torch.empty(0, self.num_rnn_layers, batch_size, self.hidden_state_size)
-        hidden_states = torch.empty(0, self.num_rnn_layers, batch_size, self.hidden_state_size, device="cuda:0")
+        hidden_states = torch.empty(0, self.num_rnn_layers, batch_size, self.hidden_state_size)
+        #hidden_states = torch.empty(0, self.num_rnn_layers, batch_size, self.hidden_state_size, device="cuda:0")
 
         # Use for loops to run over "seqLen" and "self.num_rnn_layers" to calculate logits        
         for recurrence_number in range(seqLen):
@@ -159,8 +159,8 @@ class RNN(nn.Module):
                 hidden_states = \
                 torch.cat((hidden_states, current_state.view(1, self.num_rnn_layers, batch_size, self.hidden_state_size)), dim=0)
                 # Empty the current_state (new recurrence)
-                #current_state = torch.empty(0, batch_size, self.hidden_state_size)
-                current_state = torch.empty(0, batch_size, self.hidden_state_size, device="cuda:0")
+                current_state = torch.empty(0, batch_size, self.hidden_state_size)
+                #current_state = torch.empty(0, batch_size, self.hidden_state_size, device="cuda:0")
             
             for layer_number, state_old in enumerate(initial_hidden_state):
                 
