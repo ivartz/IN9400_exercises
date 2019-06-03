@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IPyVolume Widget</title>
+    
+</head>
+<body>
+
+
+
+<!-- Load require.js. Delete this if your page already loads require.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.14.0/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+<script type="application/vnd.jupyter.widget-state+json">
+{
+  "version_major": 2,
+  "version_minor": 0,
+  "state": {
+    "53e298d6184347fe8d14928bf851631f": {
+      "model_name": "ScatterModel",
+      "model_module": "ipyvolume",
+      "model_module_version": "~0.5.1",
+      "state": {
+        "_model_module": "ipyvolume",
+        "_model_module_version": "~0.5.1",
+        "_model_name": "ScatterModel",
+        "_view_count": null,
+        "_view_module": "ipyvolume",
+        "_view_module_version": "~0.5.1",
+        "_view_name": "ScatterView",
+        "color": "red",
+        "color_selected": "white",
+        "connected": false,
+        "geo": "diamond",
+        "line_material": "IPY_MODEL_09d5b909a4a8490fb8654ba5b1878ff3",
+        "material": "IPY_MODEL_12653e8a270d42939380738277350c81",
+        "selected": null,
+        "sequence_index": 0,
+        "size": 2,
+        "size_selected": 2.6,
+        "texture": null,
+        "visible": true,
+        "vx": null,
+        "vy": null,
+        "vz": null,
+        "x": [
+          {
+            "dtype": "float32",
+            "shape": [
+              100
+            ]
+          }
+        ],
+        "y": [
+          {
+            "dtype": "float32",
+            "shape": [
+              100
+            ]
+          }
+        ],
+        "z": [
+          {
+            "dtype": "float32",
+            "shape": [
+              100
+            ]
+          }
+        ]
+      },
+      "buffers": [
+        {
+          "encoding": "base64",
+          "path": [
+            "x",
+            0,
+            "data"
+          ],
+          "data": "dUcZP+bjBz8TmHk/XOZ8PmHlbD48QD8/ak0XP+GEBD6XZU0/ddUcP7E6jj5btUs+ZXESPwh4QD9avPY+FbYUPlTa/D6CkHA/w80FPjpOED+XCQk/Cf4PP1N6gD0t6Jc6AWUwPyrU1T7URFw/1XoZP/QBIT8+Qak+hkoaP3zDBT97Mzc/8OgTP7/IwT6pky0+cjWCPaF02z7eLUU/M0lvP2iK2Tx7bLc+SfQYPts3qztfuQI/zHMCPmBbbT8/4JI+T06IPkcQKT9PWkc/9MOAPmmDAz+7m1A/9uJGP+57Fj8iRCE/1JAbP8lzbz9T5H0/ZHgXPwQ2pj6wAOE+P75qP5OAaz+Ow8k9Irb9PlzmCD/0/mg/w8fNPpTZaj/QD1U/pHBcPwOddj74pVk71tjpPgneJz9Cygw+njpwP7nUBTtQsTE+6qc8P77Shz6qzZA+Gp6NPvWVHD8KTjc+Os2gPjQdaT/Ptqo9QZpvP8BXVz+zu6Q+/sVuP/3Uaj/zQco+9FJUP6Ne+T41HvI+VG43Pg=="
+        },
+        {
+          "encoding": "base64",
+          "path": [
+            "y",
+            0,
+            "data"
+          ],
+          "data": "lRFUPdjKKz+L5kQ/vDcIPxCeKz9BZLM+y3UjP8lQPD8NDGg/UCA1PRu7jj4O0lU/dz4lPfqGUz84vPA+msYiPxw2FT+IEcg+lTDWPT/GgT6RjiQ/KbhGPQBIDj8Tqkg/5F8tP/dHFD+MT6g+a41qP4qEgD2/eG4/cUI1P6TxZj4gJQk/Ak15P04CIj+wu8M+dArBPn8kTT/ROc499xofP8QMTz7Pqyk/aRXUPm75Nz+gNFM+mglqPAF0VT8RvGA/SnZKP4T/GT5sl1I/dZqMPkLgZz9QUFg9jAtFPph1+j4hWio/a7XzPWevFD4fRh0/LHANP3KRjD5vCEc/JOV/P1eZMT94Ehk/YOgfPtU6QD4R+2g+4QmYPq1Iqj0UcUA/Z8FYP2mMOD7Z3aA9jUBmPwr7Sz9nmnA9uWUMPgOraD8OcU8/jmrfPRu7tT7KDu49R111Pxy7cj87mpI9rXm0PiNzBD5h0V0+NG5+PQ5bUz4KVzY+y6RkPyylNj8yfn4/Nm5eP41UvD6TFbE+3uE3Pw=="
+        },
+        {
+          "encoding": "base64",
+          "path": [
+            "z",
+            0,
+            "data"
+          ],
+          "data": "fthqPyjM8j3BUVY+4rQcP/n7xz4Qn9k8BWN+Pwd6bT+FAA8/B/onPuzwCT/0sY43dpVzP87gMj9UDCY/hUcOPqlqNj4HiXk/ByGXPtE1Jz8IRIg+3O65PqDxQD9XsXw/xkjtPqnyRT5sKk8/ScY1P+hlhz77cK8+Ly8GPw5YVjzpdWk/TQR1PxKaZj5NB3Q/8Gk0PxNvlT3SEq8+r5YKPythMj+FsqI+hDw8P5uXQz9nfMc+zDeePTWMJT5XrAs/VtkJP3BTOD+UYsA85QfWPZLhVz8FbSc8OcMTPDN7fj8050w+ghu+PpzADT/LSe0+jqY6P7Ym0D4fzwo/J2svP1VcCT5dcGg+gFZxP3fqVT95qaE+swjiPu/oTz9JbDU9rkNjP3FNOj+K1nw/U4hAP5NkZz4YCF0/TERFP2r+sj4qzDk/NjuWPuwIST95vn4/GxY9Pw8Tdj9EyLg+EibfPm6BAz9aOSU/pMMWP7TobD8Zo7c+mEncPu8bsD3Totk9l5SwPnRjMj5g6cg+stsCPw=="
+        }
+      ]
+    },
+    "09d5b909a4a8490fb8654ba5b1878ff3": {
+      "model_name": "ShaderMaterialModel",
+      "model_module": "jupyter-threejs",
+      "model_module_version": "^2.0.3",
+      "state": {
+        "_model_module": "jupyter-threejs",
+        "_model_module_version": "^2.0.3",
+        "_model_name": "ShaderMaterialModel",
+        "_view_count": null,
+        "_view_module": null,
+        "_view_module_version": "",
+        "_view_name": null,
+        "alphaTest": 0.0,
+        "blendDst": "OneMinusSrcAlphaFactor",
+        "blendDstAlpha": 0.0,
+        "blendEquation": "AddEquation",
+        "blendEquationAlpha": 0.0,
+        "blendSrc": "SrcAlphaFactor",
+        "blendSrcAlpha": 0.0,
+        "blending": "NormalBlending",
+        "clipIntersection": false,
+        "clipShadows": false,
+        "clipping": false,
+        "clippingPlanes": [],
+        "colorWrite": true,
+        "defines": null,
+        "depthFunc": "LessEqualDepth",
+        "depthTest": true,
+        "depthWrite": true,
+        "dithering": false,
+        "extensions": {},
+        "flatShading": false,
+        "fog": false,
+        "fragmentShader": "",
+        "lights": false,
+        "linewidth": 1.0,
+        "morphNormals": false,
+        "morphTargets": false,
+        "name": "",
+        "opacity": 1.0,
+        "overdraw": 0.0,
+        "polygonOffset": false,
+        "polygonOffsetFactor": 0.0,
+        "polygonOffsetUnits": 0.0,
+        "precision": null,
+        "premultipliedAlpha": false,
+        "shadowSide": null,
+        "side": "FrontSide",
+        "skinning": false,
+        "transparent": false,
+        "type": "ShaderMaterial",
+        "uniforms": {},
+        "uniformsNeedUpdate": false,
+        "vertexColors": "NoColors",
+        "vertexShader": "",
+        "visible": true,
+        "wireframe": false,
+        "wireframeLinewidth": 1.0
+      }
+    },
+    "12653e8a270d42939380738277350c81": {
+      "model_name": "ShaderMaterialModel",
+      "model_module": "jupyter-threejs",
+      "model_module_version": "^2.0.3",
+      "state": {
+        "_model_module": "jupyter-threejs",
+        "_model_module_version": "^2.0.3",
+        "_model_name": "ShaderMaterialModel",
+        "_view_count": null,
+        "_view_module": null,
+        "_view_module_version": "",
+        "_view_name": null,
+        "alphaTest": 0.0,
+        "blendDst": "OneMinusSrcAlphaFactor",
+        "blendDstAlpha": 0.0,
+        "blendEquation": "AddEquation",
+        "blendEquationAlpha": 0.0,
+        "blendSrc": "SrcAlphaFactor",
+        "blendSrcAlpha": 0.0,
+        "blending": "NormalBlending",
+        "clipIntersection": false,
+        "clipShadows": false,
+        "clipping": false,
+        "clippingPlanes": [],
+        "colorWrite": true,
+        "defines": null,
+        "depthFunc": "LessEqualDepth",
+        "depthTest": true,
+        "depthWrite": true,
+        "dithering": false,
+        "extensions": {},
+        "flatShading": false,
+        "fog": false,
+        "fragmentShader": "",
+        "lights": false,
+        "linewidth": 1.0,
+        "morphNormals": false,
+        "morphTargets": false,
+        "name": "",
+        "opacity": 1.0,
+        "overdraw": 0.0,
+        "polygonOffset": false,
+        "polygonOffsetFactor": 0.0,
+        "polygonOffsetUnits": 0.0,
+        "precision": null,
+        "premultipliedAlpha": false,
+        "shadowSide": null,
+        "side": "FrontSide",
+        "skinning": false,
+        "transparent": false,
+        "type": "ShaderMaterial",
+        "uniforms": {},
+        "uniformsNeedUpdate": false,
+        "vertexColors": "NoColors",
+        "vertexShader": "",
+        "visible": true,
+        "wireframe": false,
+        "wireframeLinewidth": 1.0
+      }
+    }
+  }
+}
+</script>
+<script type="application/vnd.jupyter.widget-view+json">
+{"version_major": 2, "version_minor": 0, "model_id": "53e298d6184347fe8d14928bf851631f"}
+</script>
+
+
+</body>
+</html>
